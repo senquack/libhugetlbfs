@@ -89,6 +89,18 @@ CC64 = $(CC)
 TMPLIB64 = lib64
 CFLAGS += -DNO_ELFLINK
 else
+ifneq (,$(findstring mips64,$(ARCH)))
+CC64 = $(CC)
+TMPLIB64 = lib64
+ELF64 = elf_mips64
+CUSTOM_LDSCRIPTS = no
+else
+ifneq (,$(findstring mips,$(ARCH)))
+CC32 = $(CC)
+TMPLIB32 = lib
+ELF32 = elf_mips
+CUSTOM_LDSCRIPTS = no
+else
 ifeq ($(ARCH),sparc64)
 CC64 = $(CC) -m64
 TMPLIB64 = lib64
@@ -112,6 +124,8 @@ TMPLIB32 = lib
 CUSTOM_LDSCRIPTS = no
 else
 $(error "Unrecognized architecture ($(ARCH))")
+endif
+endif
 endif
 endif
 endif

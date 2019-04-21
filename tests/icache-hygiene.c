@@ -32,6 +32,7 @@
 
 #define _GNU_SOURCE
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,7 +101,7 @@ static void sig_handler(int signum, siginfo_t *si, void *uc)
 		}
 		FAIL("SIGILL somewhere unexpected");
 	}
-#elif defined(__i386__) || defined(__x86_64__) || defined(__arm__)
+#elif defined(__i386__) || defined(__x86_64__) || defined(__arm__) || defined(__mips__)
 	/* On x86, zero bytes form a valid instruction:
 	 *	add %al,(%eax)		(i386)
 	 * or	add %al,(%rax)		(x86_64)
@@ -118,6 +119,9 @@ static void sig_handler(int signum, siginfo_t *si, void *uc)
 	 * 	andeq	r0, r0, r0	(ARM state, 4 bytes)
 	 * 	movs	r0, r0		(Thumb state, 2 bytes)
 	 *
+	 * On 32 and 64 bit MIPS, 4 zero bytes are a NOP:
+	 *	sll	$zero, $zero, 0
+	 *
 	 * So, we only expect to run off the end of the huge page and
 	 * generate a SIGBUS. */
 	if (signum == SIGBUS) {
@@ -130,12 +134,14 @@ static void sig_handler(int signum, siginfo_t *si, void *uc)
 		}
 		FAIL("SIGBUS somewhere unexpected");
 	}
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined(__mips__)
 	if (signum == SIGSEGV) {
-#ifdef __x86_64__
+#if defined(__x86_64__)
 		void *pc = (void *)((ucontext_t *)uc)->uc_mcontext.gregs[REG_RIP];
-#else
+#elif defined(__i386__)
 		void *pc = (void *)((ucontext_t *)uc)->uc_mcontext.gregs[REG_EIP];
+#elif defined(__mips__)
+		void *pc = (void *)(uintptr_t)((ucontext_t *)uc)->uc_mcontext.pc;
 #endif
 
 		verbose_printf("SIGSEGV at %p, PC=%p (sig_expected=%p)\n",
