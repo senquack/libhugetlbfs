@@ -263,7 +263,16 @@ void *cachecolor(void *buf, size_t len, size_t color_bytes)
 	if (cacheline_size == 0) {
 		cacheline_size = sysconf(_SC_LEVEL2_CACHE_LINESIZE);
 		linemod = time(NULL);
+
+		if (cacheline_size <= 0) {
+			cacheline_size = -1;
+			WARNING("Couldn't determine cacheline size, so coloring is disabled.\n");
+		}
 	}
+
+	/* Do nothing if cacheline size unknown */
+	if (cacheline_size < 0)
+		return buf;
 
 	numlines = color_bytes / cacheline_size;
 	DEBUG("%d lines of cacheline size %ld due to %zd wastage\n",
