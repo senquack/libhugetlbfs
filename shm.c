@@ -48,9 +48,8 @@
  * system shmget() may be performed without worry as there is no dynamic
  * call chain.
  */
-extern void *dlsym (void *__restrict __handle, __const char *__restrict __name)
-		__attribute__((weak)) __THROW __nonnull ((2));
-extern char *dlerror (void) __attribute__((weak)) __THROW;
+extern void *dlsym(void *, const char *) __attribute__((weak));
+extern char *dlerror(void) __attribute__((weak));
 
 
 /* call syscall shmget through the generic syscall mechanism */
