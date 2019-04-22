@@ -81,8 +81,8 @@ void _verify_stat(int line, long tot, long free, long avail)
 	statfs(mountpoint, &s);
 
 	if (s.f_blocks != tot || s.f_bfree != free || s.f_bavail != avail)
-		FAIL("Bad quota counters at line %i: total: %li free: %li "
-		       "avail: %li\n", line, s.f_blocks, s.f_bfree, s.f_bavail);
+		FAIL("Bad quota counters at line %i: total: %llu free: %llu "
+		       "avail: %llu\n", line, s.f_blocks, s.f_bfree, s.f_bavail);
 }
 #define verify_stat(t, f, a) _verify_stat(__LINE__, t, f, a)
 
