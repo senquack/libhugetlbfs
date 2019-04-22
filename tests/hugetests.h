@@ -20,6 +20,7 @@
 #ifndef _HUGETESTS_H
 #define _HUGETESTS_H
 
+#include <dirent.h>
 #include <errno.h>
 #include <string.h>
 
