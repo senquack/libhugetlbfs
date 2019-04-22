@@ -34,6 +34,31 @@
 
 #include "libhugetlbfs_internal.h"
 
+/*
+ * Disable 'morecore' feature if using MUSL, uclibc, dietlibc, etc:
+ * Only glibc provides the needed __morecore hook.
+ */
+
+/* Be careful: uclibc hackishly defines __GLIBC__ by default! */
+#if !defined(__GLIBC__) || defined(__UCLIBC__)
+
+void hugetlbfs_setup_morecore(void)
+{
+	if (! __hugetlb_opts.morecore)
+		return;
+	if (strncasecmp(__hugetlb_opts.morecore, "n", 1) == 0) {
+		INFO("HUGETLB_MORECORE=%s, not setting up morecore\n",
+						__hugetlb_opts.morecore);
+		return;
+	}
+
+	WARNING("HUGETLB_MORECORE=%s, but system using incompatible libc\n",
+						__hugetlb_opts.morecore);
+	return;
+}
+
+#else  /* __GLIBC__ */
+
 static int heap_fd;
 
 static void *heapbase;
@@ -382,3 +407,5 @@ void hugetlbfs_setup_morecore(void)
 	 * to mmap() if we run out of hugepages. */
 	mallopt(M_MMAP_MAX, 0);
 }
+
+#endif /* !defined(__GLIBC__) || defined(__UCLIBC__) */
