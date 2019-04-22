@@ -253,6 +253,10 @@ void free_huge_pages(void *ptr)
  */
 void *cachecolor(void *buf, size_t len, size_t color_bytes)
 {
+#ifndef _SC_LEVEL2_CACHE_LINESIZE
+# warning "_SC_LEVEL2_CACHE_LINESIZE is undefined: cachecolor() will be stub func."
+	return buf;
+#else
 	static long cacheline_size = 0;
 	static int linemod = 0;
 	char *bytebuf = (char *)buf;
@@ -287,6 +291,7 @@ void *cachecolor(void *buf, size_t len, size_t color_bytes)
 	DEBUG("Using line offset %d from start\n", line);
 
 	return bytebuf;
+#endif /* _SC_LEVEL2_CACHE_LINESIZE */
 }
 
 /**
